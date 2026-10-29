@@ -1,0 +1,22 @@
+{
+  "name": "health-body",
+  "version": "1.0.0",
+  "description": "Сайт массажного кабинета Health Body в Астане с легковесной RAG-системой и админкой документов",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "eval": "node --env-file-if-exists=.env eval/evaluate.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "keywords": [
+    "rag",
+    "massage",
+    "astana",
+    "openai",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "ISC"
+}

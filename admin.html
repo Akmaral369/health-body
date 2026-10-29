@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Управление базой знаний — Health Body</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fbf8ef;
+      --surface: #ffffff;
+      --mint: #dcefe5;
+      --mint2: #a9d6c4;
+      --green: #1f4d3f;
+      --gold: #a8742a;
+      --ink: #17332b;
+      --muted: #53675f;
+      --line: #e4dcc6;
+      --danger: #b33939;
+      --onGreen: #fbf8ef;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1f1a;
+        --surface: #172a23;
+        --mint: #1c3a30;
+        --mint2: #2f6a56;
+        --green: #2f6a56;
+        --gold: #d9a557;
+        --ink: #f1ece0;
+        --muted: #a9bab2;
+        --line: #2a4238;
+        --danger: #ff6b6b;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 400 15px/1.6 'Montserrat', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    h1, h2, h3 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 600;
+      line-height: 1.1;
+      margin: 0 0 10px;
+    }
+    h1 { font-size: 2.2rem; }
+    h2 { font-size: 1.6rem; }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+      width: 100%;
+    }
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      padding: 16px 0;
+    }
+    header .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .logo-link {
+      font: 600 1.4rem 'Cormorant Garamond', serif;
+      color: var(--ink);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-badge {
+      font-size: 0.75rem;
+      background: var(--mint);
+      color: var(--green);
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--green);
+      color: var(--onGreen);
+      padding: 9px 20px;
+      border-radius: 30px;
+      border: 1px solid var(--gold);
+      font: 500 0.9rem 'Montserrat', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:active { transform: scale(0.98); }
+    .btn.alt {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    .btn.danger {
+      background: transparent;
+      color: var(--danger);
+      border-color: var(--danger);
+      padding: 6px 14px;
+      font-size: 0.8rem;
+    }
+    .btn.small {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+    }
+    main {
+      flex: 1;
+      padding: 36px 0 60px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 26px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }
+    .dropzone {
+      border: 2px dashed var(--gold);
+      border-radius: 16px;
+      padding: 30px 20px;
+      text-align: center;
+      background: var(--bg);
+      cursor: pointer;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+    .dropzone.dragover {
+      border-color: var(--green);
+      background: var(--mint);
+    }
+    .dropzone p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    input[type="file"] { display: none; }
+    .alert {
+      padding: 12px 18px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .alert.error {
+      background: #ffe3e3;
+      color: #900;
+      border: 1px solid #fcc;
+      display: block;
+    }
+    .alert.success {
+      background: var(--mint);
+      color: var(--green);
+      border: 1px solid var(--mint2);
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.9rem;
+    }
+    th {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      background: var(--mint);
+      color: var(--green);
+      font-weight: 500;
+    }
+    #login-section {
+      max-width: 420px;
+      margin: 60px auto;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--ink);
+      font: inherit;
+    }
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 20px 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <a href="/" class="logo-link">
+        Health Body
+        <span class="logo-badge">RAG База знаний</span>
+      </a>
+      <div id="header-actions">
+        <a href="/" class="btn alt">← На сайт</a>
+        <button id="logout-btn" class="btn alt" style="display:none;" onclick="handleLogout()">Выйти</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="alert-box" class="alert"></div>
+
+    <!-- ФОРМА ВХОДА -->
+    <div id="login-section" class="card" style="display:none;">
+      <h2>Вход в панель управления</h2>
+      <p style="color:var(--muted); font-size:0.9rem; margin-bottom:20px;">Введите пароль администратора, заданный в настройках сервера.</p>
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="admin-pass">Пароль администратора</label>
+          <input id="admin-pass" type="password" required autofocus placeholder="Введите пароль">
+        </div>
+        <button type="submit" class="btn" style="width:100%;">Войти</button>
+      </form>
+    </div>
+
+    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
+    <div id="admin-section" style="display:none;">
+      <div class="card">
+        <h2>Загрузить документ</h2>
+        <p style="color:var(--muted); margin-bottom:16px;">
+          Поддерживаются текстовые файлы и Markdown (<strong>.txt, .md</strong>) размером до <strong>1 МБ</strong>. Текст автоматически разбивается на смысловые фрагменты и индексируется.
+        </p>
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--gold); margin-bottom:4px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+          </svg>
+          <div style="font-weight:600;">Нажмите для выбора файла или перетащите его сюда</div>
+          <p id="selected-file-info">Форматы: .txt, .md (до 1 МБ)</p>
+        </div>
+        <input type="file" id="file-input" accept=".txt,.md" onchange="handleFileSelect(event)">
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2>Загруженные документы</h2>
+          <button class="btn alt small" onclick="loadDocuments()">↻ Обновить</button>
+        </div>
+        <div id="docs-table-wrapper">
+          <div class="empty-state">Загрузка документов...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      Health Body · Администрирование RAG-базы данных
+    </div>
+  </footer>
+
+  <script>
+    function showAlert(msg, isError = false) {
+      const b = document.getElementById('alert-box');
+      b.className = 'alert ' + (isError ? 'error' : 'success');
+      b.textContent = msg;
+      b.style.display = 'block';
+      setTimeout(() => { b.style.display = 'none'; }, 6000);
+    }
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/admin/status');
+        const data = await res.json();
+        if (data.authenticated) {
+          showAdmin();
+        } else {
+          showLogin();
+        }
+      } catch (err) {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      document.getElementById('login-section').style.display = 'block';
+      document.getElementById('admin-section').style.display = 'none';
+      document.getElementById('logout-btn').style.display = 'none';
+    }
+
+    function showAdmin() {
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('admin-section').style.display = 'block';
+      document.getElementById('logout-btn').style.display = 'inline-flex';
+      loadDocuments();
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const password = document.getElementById('admin-pass').value;
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('admin-pass').value = '';
+          showAdmin();
+        } else {
+          showAlert(data.error || 'Ошибка входа', true);
+        }
+      } catch (err) {
+        showAlert('Ошибка сети при входе', true);
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        await fetch('/api/admin/logout', { method: 'POST' });
+      } finally {
+        showLogin();
+      }
+    }
+
+    async function loadDocuments() {
+      const wrapper = document.getElementById('docs-table-wrapper');
+      try {
+        const res = await fetch('/api/admin/documents');
+        if (res.status === 401) {
+          showLogin();
+          return;
+        }
+        const data = await res.json();
+        const docs = data.documents || [];
+
+        if (docs.length === 0) {
+          wrapper.innerHTML = '<div class="empty-state">В базе пока нет документов. Загрузите первый файл выше.</div>';
+          return;
+        }
+
+        let html = '<table><thead><tr><th>Документ</th><th>Фрагментов</th><th>Размер</th><th>Дата загрузки</th><th>Действия</th></tr></thead><tbody>';
+        for (const doc of docs) {
+          const dateStr = new Date(doc.created_at).toLocaleString('ru-RU', {
+            day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+          });
+          const kb = (doc.text_length / 1024).toFixed(1) + ' КБ';
+          html += `<tr>
+            <td><strong>${escapeHtml(doc.title)}</strong></td>
+            <td><span class="badge">${doc.chunk_count} фрагм.</span></td>
+            <td>${kb}</td>
+            <td style="color:var(--muted); font-size:0.85rem;">${dateStr}</td>
+            <td>
+              <div class="actions">
+                <button class="btn alt small" onclick="reindexDoc(${doc.id}, '${escapeHtml(doc.title)}')">Переиндексировать</button>
+                <button class="btn danger" onclick="deleteDoc(${doc.id}, '${escapeHtml(doc.title)}')">Удалить</button>
+              </div>
+            </td>
+          </tr>`;
+        }
+        html += '</tbody></table>';
+        wrapper.innerHTML = html;
+      } catch (err) {
+        wrapper.innerHTML = '<div class="empty-state" style="color:var(--danger)">Ошибка загрузки списка документов</div>';
+      }
+    }
+
+    async function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+      if (ext !== '.txt' && ext !== '.md') {
+        showAlert('Разрешены только файлы с расширениями .txt и .md', true);
+        return;
+      }
+
+      if (file.size > 1024 * 1024) {
+        showAlert('Размер файла превышает лимит в 1 МБ', true);
+        return;
+      }
+
+      try {
+        showAlert('Индексация документа "' + file.name + '"...');
+        const text = await file.text();
+        const res = await fetch('/api/admin/documents', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: file.name, content: text })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showAlert('Документ "' + data.document.title + '" успешно добавлен (' + data.document.chunkCount + ' фрагментов)!');
+          e.target.value = '';
+          loadDocuments();
+        } else {
+          showAlert(data.error || 'Ошибка загрузки документа', true);
+        }
+      } catch (err) {
+        showAlert('Сетевая ошибка при загрузке документа', true);
+      }
+    }
+
+    async function deleteDoc(id, title) {
+      if (!confirm('Вы уверены, что хотите удалить документ "' + title + '" и все его фрагменты?')) return;
+      try {
+        const res = await fetch('/api/admin/documents/' + id, { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok) {
+          showAlert('Документ успешно удалён');
+          loadDocuments();
+        } else {
+          showAlert(data.error || 'Ошибка при удалении', true);
+        }
+      } catch (err) {
+        showAlert('Ошибка сети при удалении', true);
+      }
+    }
+
+    async function reindexDoc(id, title) {
+      showAlert('Переиндексация документа "' + title + '"...');
+      try {
+        const res = await fetch('/api/admin/reindex/' + id, { method: 'POST' });
+        const data = await res.json();
+        if (res.ok) {
+          showAlert('Документ "' + title + '" успешно переиндексирован (' + data.document.chunkCount + ' фрагментов)!');
+          loadDocuments();
+        } else {
+          showAlert(data.error || 'Ошибка переиндексации', true);
+        }
+      } catch (err) {
+        showAlert('Ошибка сети при переиндексации', true);
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    // Drag and drop для зоны загрузки
+    const dz = document.getElementById('dropzone');
+    ['dragenter', 'dragover'].forEach(name => {
+      dz.addEventListener(name, (e) => { e.preventDefault(); dz.classList.add('dragover'); }, false);
+    });
+    ['dragleave', 'drop'].forEach(name => {
+      dz.addEventListener(name, (e) => { e.preventDefault(); dz.classList.remove('dragover'); }, false);
+    });
+    dz.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      if (dt.files && dt.files[0]) {
+        document.getElementById('file-input').files = dt.files;
+        handleFileSelect({ target: { files: dt.files } });
+      }
+    });
+
+    checkAuth();
+  </script>
+</body>
+</html>
+

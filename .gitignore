@@ -1,0 +1,6 @@
+.env
+rag.db
+rag.db-journal
+node_modules/
+.DS_Store
+
